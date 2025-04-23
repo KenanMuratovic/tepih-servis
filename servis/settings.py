@@ -131,3 +131,4 @@ import os
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
+ALLOWED_HOSTS = ['.onrender.com', 'tepih-servis.onrender.com']
