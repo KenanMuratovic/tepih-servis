@@ -1,0 +1,32 @@
+body {
+    
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+/* Crvena pozadina */
+.bg-crvena {
+    background-color: rgba(237, 29, 35, 1);
+}
+
+/* Glavni linkovi */
+.nav-custom .nav-link {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #ffffff;
+    padding: 0.75rem 1.25rem;
+    transition: color 0.2s ease-in-out, text-decoration 0.2s ease-in-out;
+}
+
+.nav-custom .nav-link:hover {
+    text-decoration: underline;
+}
+
+/* Separator element između linkova */
+.nav-separator {
+    width: 1px;
+    height: 24px;
+    background-color: rgba(255, 255, 255, 0.5);
+    margin: 0 0.5rem;
+}
