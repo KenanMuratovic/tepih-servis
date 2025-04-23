@@ -1,0 +1,54 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block title %}Registracija | Tepih Servis Vas{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Registracija korisnika</h2>
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_ime" class="form-label">Ime</label>
+                {{ form.ime|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_prezime" class="form-label">Prezime</label>
+                {{ form.prezime|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_email" class="form-label">Email</label>
+                {{ form.email|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_broj_telefona" class="form-label">Broj telefona</label>
+                {{ form.broj_telefona|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_lokacija" class="form-label">Lokacija (opciono)</label>
+                {{ form.lokacija|add_class:"form-control" }}
+            </div>
+
+            <hr class="my-4">
+
+            <div class="mb-3">
+                <label for="id_password1" class="form-label">Lozinka</label>
+                {{ form.password1|add_class:"form-control" }}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_password2" class="form-label">Potvrdi lozinku</label>
+                {{ form.password2|add_class:"form-control" }}
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Registruj se</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

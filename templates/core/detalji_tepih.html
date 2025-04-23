@@ -1,0 +1,25 @@
+{% extends "core/base.html" %}
+{% load form_tags %}
+
+{% block content %}
+<h2>{{ tepih.vrsta }} ({{ tepih.velicina_m2 }} m²)</h2>
+<p><strong>Napomena:</strong> {{ tepih.napomena }}</p>
+
+<hr>
+<h4>Zakazivanje termina</h4>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-success">Zakaži termin</button>
+</form>
+
+{% if zakazano %}
+    <hr>
+    <h5>Već zakazani termini</h5>
+    <ul>
+        {% for z in zakazano %}
+            <li>{{ z.datum|date:"d.m.Y H:i" }} — <strong>{{ z.status }}</strong></li>
+        {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

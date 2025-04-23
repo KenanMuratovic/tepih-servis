@@ -1,0 +1,52 @@
+{% extends "core/base.html" %}
+
+{% block title %}Moja zakazivanja{% endblock %}
+
+{% block content %}
+<h2 class="mb-4">Zakazani termini</h2>
+
+{% if zakazi %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Zakazano</th>
+                <th>Vrijeme</th>
+                <th>Cijena</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for z in zakazi %}
+                <tr>
+                    <td>
+                        {% if z.tepisi.count == 1 %}
+                            1 tepih
+                        {% else %}
+                            {{ z.tepisi.count }} tepiha
+                        {% endif %}
+                    </td>
+                    <td>{{ z.datum|date:"d.m.Y H:i" }}</td>
+                    <td>{{ z.cena }} €</td>   
+                    <td><span class="badge bg-secondary">{{ z.status }}</span></td>
+                    <td>
+                        <form method="post" action="{% url 'otkazi-zakazivanje' z.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Da li ste sigurni da želite da otkažete ovaj termin?');">
+                                Otkaži
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{% url 'zakazivanje' %}" class="btn btn-primary mt-4">Zakaži novi termin</a>
+
+
+{% else %}
+    <p>Nemate zakazanih termina.</p>
+    <a href="{% url 'zakazivanje' %}" class="btn btn-primary btn-lg mt-4">Zakaži termin</a>
+{% endif %}
+{% endblock %}

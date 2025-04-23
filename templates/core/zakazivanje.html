@@ -1,0 +1,192 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block title %}Zakazivanje termina | Tepih Servis Vas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2 class="mb-4">Zakazivanje termina</h2>
+
+    <form method="post" id="zakazivanje-form">
+        {% csrf_token %}
+        <div class="row">
+            <div class="col-md-8">
+                <h5>Vaši tepisi:</h5>
+                {% if tepisi %}
+                    <ul class="list-group">
+                        {% for tepih in tepisi %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <input type="checkbox" name="tepisi" value="{{ tepih.id }}"
+                                           class="form-check-input me-2 tepih-checkbox"
+                                           data-cena="{{ tepih.velicina_m2|floatformat:2 }}">
+                                    {{ tepih.vrsta }} — {{ tepih.velicina_m2 }} m²
+                                    {% if tepih.napomena %}
+                                        <small class="text-muted">({{ tepih.napomena }})</small>
+                                    {% endif %}
+                                </div>
+                                <span class="badge bg-primary rounded-pill">
+                                    {{ tepih.cena|floatformat:2 }} €
+                                </span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Nemate nijedan tepih.</p>
+                {% endif %}
+
+                <button type="button" class="btn btn-outline-success mt-3" data-bs-toggle="modal" data-bs-target="#modalTepih">
+                    + Dodaj novi tepih
+                </button>
+            </div>
+
+            <div class="col-md-4">
+                <h5 class="mb-3">Zakazivanje</h5>
+
+                <div class="mb-3">
+                    <label for="id_datum" class="form-label">Datum i vreme</label>
+                    <input type="datetime-local" name="datum" class="form-control" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ukupna cena</label>
+                    <div class="form-control-plaintext fs-5">
+                        <strong><span id="ukupno">0.00</span> €</strong>
+                    </div>
+                    <input type="hidden" id="cena_po_m2" value="{{ cena_po_m2 }}">
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">Zakaži termin</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<!-- MODAL: Dodaj Tepih -->
+<div class="modal fade" id="modalTepih" tabindex="-1" aria-labelledby="modalTepihLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="tepih-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTepihLabel">Dodaj novi tepih</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Vrsta</label>
+            <select name="vrsta" class="form-select" required>
+                <option value="">-- Odaberi --</option>
+                <option value="vuna">Vuna</option>
+                <option value="pamuk">Pamuk</option>
+                <option value="sintetika">Sintetika</option>
+                <option value="orijentalni">Orijentalni</option>
+                <option value="antialergijski">Antialergijski</option>
+                <option value="tepison">Tepison</option>
+            </select>
+        </div>
+        <div class="mb-3 row">
+            <div class="col">
+                <label>Duzina (m)</label>
+                <input type="number" step="0.01" id="duzina" class="form-control" placeholder="npr. 2.5">
+            </div>
+            <div class="col">
+                <label>Širina (m)</label>
+                <input type="number" step="0.01" id="sirina" class="form-control" placeholder="npr. 3.0">
+            </div>
+        </div>
+        <div class="mb-3">
+            <p><strong>Površina:</strong> <span id="modal_povrsina">0.00</span> m²</p>
+            <p><strong>Cena:</strong> <span id="modal_cena">0.00</span> €</p>
+        </div>
+        <input type="hidden" name="velicina_m2" id="velicina_m2">
+        <div class="mb-3">
+            <label>Napomena (opciono)</label>
+            <textarea name="napomena" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Sačuvaj</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+    const ukupnoSpan = document.getElementById('ukupno');
+    const cenaPoM2 = parseFloat(document.getElementById('cena_po_m2').value);
+
+    function updateTotal() {
+        let total = 0;
+        document.querySelectorAll('.tepih-checkbox').forEach(checkbox => {
+            if (checkbox.checked) {
+                const velicina = parseFloat(checkbox.getAttribute('data-cena'));
+                total += velicina * cenaPoM2;
+            }
+        });
+        ukupnoSpan.textContent = total.toFixed(2);
+    }
+
+    document.querySelectorAll('.tepih-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', updateTotal);
+    });
+
+    function izracunajPovrsinuIModalnuCenu() {
+        const d = parseFloat(document.getElementById('duzina').value);
+        const s = parseFloat(document.getElementById('sirina').value);
+        const povrsina = d && s ? (d * s).toFixed(2) : '0.00';
+        const cena = d && s ? (d * s * cenaPoM2).toFixed(2) : '0.00';
+
+        document.getElementById('velicina_m2').value = povrsina;
+        document.getElementById('modal_povrsina').innerText = povrsina;
+        document.getElementById('modal_cena').innerText = cena;
+    }
+
+    document.getElementById('duzina').addEventListener('input', izracunajPovrsinuIModalnuCenu);
+    document.getElementById('sirina').addEventListener('input', izracunajPovrsinuIModalnuCenu);
+
+    const tepihForm = document.getElementById('tepih-form');
+    const listGroup = document.querySelector('.list-group');
+
+    tepihForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(tepihForm);
+
+        fetch("{% url 'ajax-dodaj-tepih' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.id) {
+                const novi = document.createElement('li');
+                novi.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+                novi.innerHTML = `
+                    <div>
+                        <input type="checkbox" name="tepisi" value="${data.id}" class="form-check-input me-2 tepih-checkbox" data-cena="${data.velicina}">
+                        ${data.vrsta} — ${data.velicina} m²
+                        ${data.napomena ? `<small class="text-muted">(${data.napomena})</small>` : ''}
+                    </div>
+                    <span class="badge bg-primary rounded-pill">${(parseFloat(data.velicina) * cenaPoM2).toFixed(2)} €</span>
+                `;
+
+                listGroup.appendChild(novi);
+                const checkbox = novi.querySelector('.tepih-checkbox');
+                checkbox.addEventListener('change', updateTotal);
+
+                document.querySelector('#modalTepih .btn-close').click();
+                tepihForm.reset();
+                izracunajPovrsinuIModalnuCenu();
+                updateTotal();
+            } else {
+                alert("Greška pri unosu.");
+            }
+        })
+        .catch(err => console.error(err));
+    });
+</script>
+{% endblock %}

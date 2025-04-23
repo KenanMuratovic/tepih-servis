@@ -1,0 +1,147 @@
+{% extends "core/base.html" %}
+{% load static %}
+
+{% block content %}
+<h2>Moji tepisi</h2>
+
+<!-- Dugme za modal -->
+<button type="button" class="btn btn-success mb-3" data-bs-toggle="modal" data-bs-target="#modalTepih">
+    + Dodaj novi tepih
+</button>
+
+<ul class="list-group">
+    {% for tepih in tepisi %}
+        <li class="list-group-item">
+            <div class="row w-100 align-items-center">
+                <div class="col-md-9">
+                    <strong>{{ tepih.vrsta|title }}</strong>
+                    <div class="text-muted small">
+                        Površina: {{ tepih.velicina_m2 }} m²<br>
+                        Datum: {{ tepih.datum_unosa|date:"d.m.Y H:i" }}
+                        {% if tepih.napomena %}
+                            <br>Napomena: {{ tepih.napomena }}
+                        {% endif %}
+                    </div>
+                    <div class="mt-2">
+                        <span class="badge bg-primary fs-6">
+                            {{ tepih.cena|floatformat:2 }} €
+                        </span>
+                    </div>
+                </div>
+                
+                              
+                <div class="col-md-3 text-md-end mt-2 mt-md-0 d-flex justify-content-end align-items-center">
+                    
+                    <button class="btn btn-outline-danger py-2 px-3" style="font-size: 1rem;" onclick="ukloniTepih('{{ tepih.id }}', this)">Ukloni</button>
+                </div>
+            </div>
+        </li>
+    {% empty %}
+        <li class="list-group-item">Nemate unesenih tepiha.</li>
+    {% endfor %}
+</ul>
+
+<!-- Modal za dodavanje -->
+<div class="modal fade" id="modalTepih" tabindex="-1" aria-labelledby="modalTepihLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <form id="tepih-form" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTepihLabel">Dodaj novi tepih</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zatvori"></button>
+      </div>
+      <div class="modal-body">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label>Vrsta</label>
+            <select name="vrsta" class="form-select" required>
+                <option value="">-- Odaberi --</option>
+                <option value="vuna">Vuna</option>
+                <option value="pamuk">Pamuk</option>
+                <option value="sintetika">Sintetika</option>
+                <option value="orijentalni">Orijentalni</option>
+                <option value="antialergijski">Antialergijski</option>
+                <option value="tepison">Tepison</option>
+            </select>
+        </div>
+        <div class="mb-3 row">
+            <div class="col">
+                <label>Dužina (m)</label>
+                <input type="number" step="0.01" id="duzina" class="form-control" placeholder="npr. 2.5">
+            </div>
+            <div class="col">
+                <label>Širina (m)</label>
+                <input type="number" step="0.01" id="sirina" class="form-control" placeholder="npr. 3.0">
+            </div>
+        </div>
+        <div class="mb-3">
+            <p><strong>Površina:</strong> <span id="modal_povrsina">0.00</span> m²</p>
+            <p><strong>Cena:</strong> <span id="modal_cena">0.00</span> €</p>
+        </div>
+        <input type="hidden" name="velicina_m2" id="velicina_m2">
+        <div class="mb-3">
+            <label>Napomena (opciono)</label>
+            <textarea name="napomena" class="form-control"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Sačuvaj</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Skripta -->
+<script>
+    const cenaPoM2 = parseFloat("{{ cena_po_m2|default:3.00 }}");
+
+    function izracunajPovrsinuICenu() {
+        const d = parseFloat(document.getElementById('duzina').value);
+        const s = parseFloat(document.getElementById('sirina').value);
+        const povrsina = d && s ? (d * s).toFixed(2) : '0.00';
+        const cena = d && s ? (d * s * cenaPoM2).toFixed(2) : '0.00';
+
+        document.getElementById('velicina_m2').value = povrsina;
+        document.getElementById('modal_povrsina').innerText = povrsina;
+        document.getElementById('modal_cena').innerText = cena;
+    }
+
+    document.getElementById('duzina').addEventListener('input', izracunajPovrsinuICenu);
+    document.getElementById('sirina').addEventListener('input', izracunajPovrsinuICenu);
+
+    document.getElementById('tepih-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch("{% url 'ajax-dodaj-tepih' %}", {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.id) {
+                location.reload();
+            } else {
+                alert('Greška prilikom dodavanja tepiha.');
+            }
+        });
+    });
+
+    function ukloniTepih(id, dugme) {
+        if (!confirm('Da li ste sigurni da želite da uklonite ovaj tepih?')) return;
+
+        fetch(`/tepih/${id}/ukloni/`, {
+            method: 'GET'
+        })
+        .then(res => {
+            if (res.ok) {
+                const listItem = dugme.closest('li');
+                listItem.remove();
+            } else {
+                alert('Greška prilikom uklanjanja tepiha.');
+            }
+        });
+    }
+</script>
+{% endblock %}

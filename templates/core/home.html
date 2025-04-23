@@ -1,0 +1,33 @@
+{% extends "core/base.html" %}
+{% block title %}Početna | Tepih Servis Vas{% endblock %}
+
+{% block content %}
+{% load static %}
+
+<div class="container py-5 d-flex flex-column align-items-center text-center">
+
+    <!-- Logo -->
+    <div class="mb-4">
+        <img src="{% static 'logo2.png' %}" alt="Tepih Servis - Vas Logo" 
+             style="max-width: 500px; width: 100%;" class="img-fluid">
+    </div>
+
+    <!-- Poruka dobrodošlice -->
+    <p class="lead mb-4" style="max-width: 600px;">
+        Mi peremo Vaše tepihe s pažnjom, preciznošću i ljubavlju. 
+        Registrujte se, dodajte Vaše tepihe i zakažite pranje brzo i lako.
+    </p>
+
+    <!-- Akciono dugme -->
+    {% if user.is_authenticated %}
+        <a href="{% url 'zakazivanje' %}" class="btn btn-primary btn-lg px-5 shadow">
+            Zakaži termin
+        </a>
+    {% else %}
+        <a href="{% url 'register' %}" class="btn btn-success btn-lg px-5 shadow">
+            Registruj se odmah
+        </a>
+    {% endif %}
+
+</div>
+{% endblock %}
