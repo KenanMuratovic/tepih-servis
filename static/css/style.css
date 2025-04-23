@@ -1,3 +1,42 @@
+/* RESPONSIVE STILOVI */
+
+@media (max-width: 768px) {
+    .nav-custom {
+      flex-direction: column;
+      align-items: start;
+      padding: 10px 0;
+    }
+  
+    .nav-custom .nav-link {
+      display: block;
+      width: 100%;
+      padding: 10px 20px;
+      font-size: 1rem;
+      text-align: left;
+      border-left: none;
+    }
+  
+    .navbar-nav {
+      flex-direction: column;
+    }
+  
+    .navbar-brand img {
+      height: 60px !important;
+      width: auto !important;
+      margin-bottom: 10px;
+    }
+  
+    .text-center .btn {
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  
+    .lead {
+      font-size: 1rem;
+      padding: 0 10px;
+    }
+  }
+  
 body {
     
     background-size: cover;
